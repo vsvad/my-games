@@ -1,7 +1,6 @@
 SMILES_URL='https://skypefan.ru/smajly/'
 from bs4 import BeautifulSoup
 import requests,os
-from PIL import Image
 soup = BeautifulSoup(requests.get(SMILES_URL).text, 'lxml')
 res=soup.find_all('img')
 imgs=[]
@@ -12,11 +11,16 @@ if not os.path.isdir('images/'):
 os.chdir('images')
 for i in range(len(imgs)):
 	try:
-		idt=requests.get(imgs[i],stream=True).raw
+		idt=requests.get(imgs[i],stream=True).content
 		try:
-			img=Image.open(idt)
-			img.save(str(i+1)+'.png')
-			print(i+1)
+			file=imgs[i].split('/')[-1]
+			if file.find('?')!=-1:
+				file=file[:file.find('?')]
+			file=str(i+1)+'_'+file
+			print(i+1,':',file)
+			f=open(file,'wb')
+			f.write(idt)
+			f.close()
 		except IOError:
 			pass
 	except requests.exceptions.RequestException:
